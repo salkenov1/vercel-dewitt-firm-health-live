@@ -1,0 +1,10 @@
+{
+  "name": "dewitt-firm-health-live",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "22.x" },
+  "dependencies": {
+    "@google-cloud/bigquery": "7.9.1"
+  }
+}

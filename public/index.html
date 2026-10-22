@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex, nofollow">
+<title>DeWitt Firm Health</title>
+<style>
+:root {
+  --font-anthropic-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", system-ui, sans-serif;
+  --color-bg: #f2f2f7; --color-fg: #1d1d1f; --color-fg-muted: #6e6e73; --color-panel: #ffffff; --color-border-line: #d2d2d7;
+  --color-ok: #248a3d; --color-warn: #c93400; --color-bad: #d70015; --accent: #0071e3; --on-accent: #ffffff;
+  --cds-font-size-caption: 12px; --cds-font-size-body: 14px; --cds-font-size-heading: 15px; --cds-font-size-title: 22px; --cds-font-weight-medium: 600;
+  --cds-pad-xs: 6px; --cds-pad-sm: 10px; --cds-radius: 12px; --cds-dur-slow: 240ms;
+  --cds-surface-popover: rgba(255,255,255,.86); --cds-border: rgba(0,0,0,.08); --cds-shadow-popover: 0 10px 30px rgba(0,0,0,.14); --cds-text-secondary: #6e6e73;
+  --cds-chart-grid: rgba(60,60,67,.10); --cds-chart-axis: rgba(60,60,67,.26); --cds-chart-reference: rgba(60,60,67,.45); --cds-chart-muted: rgba(120,120,128,.22);
+  --g-bar: rgba(250,250,252,.84); --g-fill: rgba(255,255,255,.50); --g-fill-strong: rgba(255,255,255,.80); --g-track: rgba(118,118,128,.12);
+  --g-rim-hi: rgba(255,255,255,.95); --g-rim-lo: rgba(255,255,255,.18);
+  --g-inset: inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 0 rgba(255,255,255,.25);
+  --g-shadow: 0 1px 2px rgba(0,0,0,.04), 0 14px 36px -10px rgba(30,40,80,.20);
+  --g-blob: .38;
+  --rag-g: #248a3d; --rag-y: #b86e00; --rag-r: #d70015; --rag-g-dot: #34c759; --rag-y-dot: #ff9f0a; --rag-r-dot: #ff3b30;
+  --r-card: 20px; --r-tile: 16px; --r-ctl: 10px; --r-pill: 8px; --r-mini: 6px;
+  --dash-gutter: clamp(16px, 3vw, 44px);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --color-bg: #000000; --color-fg: #f5f5f7; --color-fg-muted: #98989d; --color-panel: #1c1c1e; --color-border-line: #38383a;
+  --color-ok: #30d158; --color-warn: #ff9f0a; --color-bad: #ff453a; --accent: #2997ff; --on-accent: #ffffff;
+  --cds-surface-popover: rgba(44,44,46,.88); --cds-border: rgba(255,255,255,.12); --cds-shadow-popover: 0 10px 30px rgba(0,0,0,.6); --cds-text-secondary: #98989d;
+  --cds-chart-grid: rgba(255,255,255,.08); --cds-chart-axis: rgba(255,255,255,.22); --cds-chart-reference: rgba(255,255,255,.45); --cds-chart-muted: rgba(120,120,128,.36);
+  --g-bar: rgba(30,30,32,.80); --g-fill: rgba(44,44,46,.42); --g-fill-strong: rgba(72,72,74,.62); --g-track: rgba(118,118,128,.24);
+  --g-rim-hi: rgba(255,255,255,.30); --g-rim-lo: rgba(255,255,255,.04);
+  --g-inset: inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(255,255,255,.03);
+  --g-shadow: 0 14px 36px -10px rgba(0,0,0,.7);
+  --g-blob: .30;
+  --rag-g: #30d158; --rag-y: #ffb340; --rag-r: #ff6961; --rag-g-dot: #30d158; --rag-y-dot: #ff9f0a; --rag-r-dot: #ff453a;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --color-bg: #000000; --color-fg: #f5f5f7; --color-fg-muted: #98989d; --color-panel: #1c1c1e; --color-border-line: #38383a;
+  --color-ok: #30d158; --color-warn: #ff9f0a; --color-bad: #ff453a; --accent: #2997ff; --on-accent: #ffffff;
+  --cds-surface-popover: rgba(44,44,46,.88); --cds-border: rgba(255,255,255,.12); --cds-shadow-popover: 0 10px 30px rgba(0,0,0,.6); --cds-text-secondary: #98989d;
+  --cds-chart-grid: rgba(255,255,255,.08); --cds-chart-axis: rgba(255,255,255,.22); --cds-chart-reference: rgba(255,255,255,.45); --cds-chart-muted: rgba(120,120,128,.36);
+  --g-bar: rgba(30,30,32,.80); --g-fill: rgba(44,44,46,.42); --g-fill-strong: rgba(72,72,74,.62); --g-track: rgba(118,118,128,.24);
+  --g-rim-hi: rgba(255,255,255,.30); --g-rim-lo: rgba(255,255,255,.04);
+  --g-inset: inset 0 1px 0 rgba(255,255,255,.14), inset 0 -1px 0 rgba(255,255,255,.03);
+  --g-shadow: 0 14px 36px -10px rgba(0,0,0,.7);
+  --g-blob: .30;
+  --rag-g: #30d158; --rag-y: #ffb340; --rag-r: #ff6961; --rag-g-dot: #30d158; --rag-y-dot: #ff9f0a; --rag-r-dot: #ff453a;
+  color-scheme: dark; }
+[hidden] { display: none !important; }
+img { max-width: 100%; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--color-bg); }
+html, body { margin: 0; background: var(--color-bg); color: var(--color-fg); font-family: var(--font-anthropic-sans); font-size: 14px; }
+#dash-root { padding-block: 16px 48px; padding-left: max(var(--dash-gutter), env(safe-area-inset-left, 0px)); padding-right: max(var(--dash-gutter), env(safe-area-inset-right, 0px)); max-width: 1600px; margin: 0 auto; box-sizing: border-box; }
+.dash-skeleton { color: transparent !important; background: linear-gradient(90deg, var(--g-track), transparent); border-radius: 8px; min-height: 1em; display: inline-block; min-width: 4em; }
+</style>
+<style>
+/* Apple Liquid Glass: translucent layers with a specular rim over a soft, colourful backdrop. */
+.fh {
+  --fh-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", var(--font-anthropic-sans), system-ui, sans-serif;
+  --fh-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", var(--font-anthropic-sans), system-ui, sans-serif;
+  --fh-r: var(--r-card); --fh-r-sm: var(--r-tile);
+  position: relative; isolation: isolate; font-family: var(--fh-font); font-variant-numeric: tabular-nums; color: var(--color-fg);
+  padding-block: 2px 24px; -webkit-font-smoothing: antialiased; letter-spacing: -0.005em;
+}
+.fh::before {
+  content: ""; position: fixed; inset: -10vmax; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(38vmax 30vmax at 12% 6%, color-mix(in srgb, var(--fh-c1, #0071e3) calc(var(--g-blob) * 100%), transparent), transparent 70%),
+    radial-gradient(34vmax 28vmax at 88% 12%, color-mix(in srgb, var(--fh-c2, #af52de) calc(var(--g-blob) * 90%), transparent), transparent 70%),
+    radial-gradient(40vmax 30vmax at 72% 78%, color-mix(in srgb, var(--fh-c3, #34c759) calc(var(--g-blob) * 70%), transparent), transparent 72%),
+    radial-gradient(36vmax 30vmax at 18% 88%, color-mix(in srgb, var(--fh-c4, #ff9500) calc(var(--g-blob) * 75%), transparent), transparent 72%);
+  filter: saturate(120%);
+}
+/* the glass material */
+.fh-bar-top, .fh-card, .fh-tile, .fh-tag, .fh-chip {
+  position: relative; background: var(--g-fill);
+  -webkit-backdrop-filter: blur(28px) saturate(190%); backdrop-filter: blur(28px) saturate(190%);
+  box-shadow: var(--g-inset), var(--g-shadow); border: 0;
+}
+.fh-bar-top::after, .fh-card::after, .fh-tile::after, .fh-tag::after, .fh-chip::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+  background: linear-gradient(145deg, var(--g-rim-hi), var(--g-rim-lo) 32%, var(--g-rim-lo) 64%, var(--g-rim-hi));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+}
+
+/* toolbar */
+.fh-bar-top { background: var(--g-bar); -webkit-backdrop-filter: blur(40px) saturate(200%); backdrop-filter: blur(40px) saturate(200%); }
+.fh-bar-top { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 12px 12px 12px 20px; border-radius: var(--r-card); margin-bottom: 24px; }
+.fh-brand { display: flex; flex-direction: column; gap: 1px; min-width: 0; margin-right: auto; }
+.fh-eyebrow { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.02em; color: var(--color-fg-muted); text-transform: uppercase; }
+.fh-title { font-family: var(--fh-display); font-weight: 700; letter-spacing: -0.025em; font-size: 1.75rem; margin: 0; line-height: 1.1; }
+.fh-sub { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin: 4px 0 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.fh-sample { display: inline-block; padding: 2px 8px; border-radius: var(--r-mini); background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); font-weight: 600; }
+
+/* segmented controls (iOS style, glass thumb) */
+.seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: var(--r-ctl); background: var(--g-track); flex-wrap: wrap; }
+.seg button { font: inherit; font-size: 13px; font-weight: 500; border: 0; background: transparent; color: var(--color-fg); padding: 6px 14px; border-radius: 8px; cursor: pointer; white-space: nowrap; transition: background var(--cds-dur-slow), box-shadow var(--cds-dur-slow); }
+.seg button:hover { background: color-mix(in srgb, var(--color-fg) 6%, transparent); }
+.seg button:disabled { opacity: .45; cursor: not-allowed; display: inline-flex; align-items: center; gap: 5px; }
+.seg button:disabled .fh-lock { flex: none; }
+.seg button[aria-selected="true"] { background: var(--g-fill-strong); font-weight: 600; box-shadow: var(--g-inset), 0 3px 10px -2px rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.06); }
+.seg.big button { font-size: 14px; padding: 7px 20px; }
+.seg button:focus-visible, .fh-chip:focus-visible, .fh-tag:focus-visible, .fh-tile.click:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent); outline-offset: 2px; }
+.fh-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.fh-filters label { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: inline-flex; align-items: center; gap: 6px; }
+.fh-in { font: inherit; font-size: 13px; padding: 6px 10px; border-radius: var(--r-ctl); border: 0; background: var(--g-track); color: var(--color-fg); max-width: 100%; }
+.fh-in:focus { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); }
+.fh-range { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+
+/* views, tabs */
+.fh-view { display: flex; flex-direction: column; gap: 24px; }
+.fh-tabs { overflow-x: auto; max-width: 100%; align-self: flex-start; flex-wrap: nowrap; scrollbar-width: none; }
+.fh-sec { display: flex; flex-direction: column; gap: 16px; }
+.fh-sec h2 { font-family: var(--fh-display); font-size: 1.375rem; font-weight: 700; letter-spacing: -0.02em; margin: 16px 0 0; text-wrap: balance; }
+.fh-sec > h2:first-child { margin-top: 0; }
+.fh-sec h2 small { display: block; color: var(--color-fg-muted); font-weight: 400; font-size: 13px; margin: 4px 0 0; letter-spacing: 0; }
+.fh-grid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .fh-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.fh-tiles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 12rem), 1fr)); }
+@media (min-width: 1100px) {
+  .fh-tiles:has(> :nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .fh-tiles:has(> :nth-child(4):last-child), .fh-tiles:has(> :nth-child(7):last-child), .fh-tiles:has(> :nth-child(8):last-child) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .fh-tiles:has(> :nth-child(5):last-child), .fh-tiles:has(> :nth-child(9):last-child), .fh-tiles:has(> :nth-child(10):last-child) { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .fh-tiles:has(> :nth-child(6):last-child) { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+.fh-card { border-radius: var(--fh-r); padding: 20px; min-width: 0; display: flex; flex-direction: column; }
+.fh-card h3 { font-size: 17px; font-weight: 600; margin: 0 0 4px; letter-spacing: -0.015em; }
+.fh-card .note { color: var(--color-fg-muted); font-size: 13px; margin: 0 0 16px; }
+.fh-tile { border-radius: var(--fh-r-sm); padding: 16px; min-width: 0; display: flex; flex-direction: column; gap: 4px; transition: transform var(--cds-dur-slow), box-shadow var(--cds-dur-slow); }
+.fh-tile.click:hover { transform: translateY(-2px); }
+.fh-tile.alert .lbl::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--color-warn); margin-right: 6px; vertical-align: 1px; }
+.fh-tile.click { cursor: pointer; }
+.fh-tile.click[aria-pressed="true"] { background: color-mix(in srgb, var(--accent) 16%, var(--g-fill)); }
+.fh-tile .lbl { font-size: 13px; font-weight: 500; color: var(--color-fg-muted); line-height: 1.3; min-height: 2.6em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.fh-tile .val { font-family: var(--fh-display); font-weight: 700; letter-spacing: -0.03em; font-size: 2rem; line-height: 1.12; }
+.fh-tile .win { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.fh-tile .spark { height: 40px; margin-top: 8px; }
+.fh-tile .win { margin-top: auto; }
+.fh-tile .val + .win { margin-top: 0; }
+.fh-tile .spark svg { width: 100%; height: 40px; display: block; overflow: visible; }
+.fh-delta { font-size: 11.5px; font-weight: 600; padding: 2px 6px; border-radius: var(--r-mini); background: var(--g-track); }
+.fh-delta.good { color: var(--color-ok); background: color-mix(in srgb, var(--color-ok) 13%, transparent); }
+.fh-delta.bad { color: var(--color-bad); background: color-mix(in srgb, var(--color-bad) 12%, transparent); }
+.fh-chart { position: relative; min-height: 220px; }
+.fh-chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.fh-chart text, .spark text { font-family: var(--fh-font); font-size: 11px; fill: var(--color-fg-muted); }
+.fh-tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--cds-border); border-radius: var(--r-ctl); box-shadow: var(--cds-shadow-popover); padding: 8px 12px; font-size: var(--cds-font-size-caption); white-space: nowrap; z-index: 3; }
+.fh-tip .k { color: var(--cds-text-secondary); }
+.fh-tip .sw { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.fh-tbl { overflow: auto; max-height: 540px; border-radius: 12px; background: color-mix(in srgb, var(--color-panel) 35%, transparent); }
+.fh-tbl table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+.fh-tbl th { position: sticky; top: 0; z-index: 1; background: var(--g-fill-strong); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); text-align: left; font-weight: 600; color: var(--color-fg-muted); font-size: 12px; padding: 10px 12px; border-bottom: 0.5px solid var(--cds-chart-axis); cursor: pointer; white-space: nowrap; }
+.fh-tbl th[aria-sort="ascending"]::after { content: " ↑"; color: var(--accent); } .fh-tbl th[aria-sort="descending"]::after { content: " ↓"; color: var(--accent); }
+.fh-tbl td { padding: 10px 12px; border-bottom: 0.5px solid var(--cds-chart-grid); white-space: nowrap; }
+.fh-tbl tbody tr:hover td { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.fh-tbl td.num, .fh-tbl th.num { text-align: right; }
+.fh-bar { position: relative; height: 10px; border-radius: 5px; background: var(--g-track); overflow: hidden; margin-top: 8px; }
+.fh-bar i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, var(--fh-c1, var(--accent)), var(--fh-c2, var(--accent))); border-radius: 5px; }
+.fh-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-bottom: 8px; }
+.fh-legend span i { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+.fh-search { font: inherit; font-size: 13px; padding: 7px 12px; border: 0; border-radius: var(--r-ctl); background: var(--g-track); color: var(--color-fg); margin-bottom: 16px; max-width: 100%; min-width: min(100%, 16rem); }
+.fh-search:focus { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); }
+.fh-def { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin: 0; }
+
+/* pills: raw-source chips and metric tags */
+.fh-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.fh-chip, .fh-tag { font: inherit; font-size: 13px; font-weight: 500; border-radius: var(--r-pill); padding: 7px 12px; color: var(--color-fg); cursor: pointer; transition: transform var(--cds-dur-slow), background var(--cds-dur-slow); }
+.fh-chip:hover, .fh-tag:hover { transform: translateY(-1px); }
+.fh-chip[aria-pressed="true"], .fh-tag[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+.fh-chip[aria-pressed="true"] small { color: color-mix(in srgb, var(--on-accent) 75%, transparent); }
+.fh-rag { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; vertical-align: 1px; }
+.fh-rag.green { background: var(--rag-g-dot); } .fh-rag.yellow { background: var(--rag-y-dot); } .fh-rag.red { background: var(--rag-r-dot); }
+.fh-ragpill { display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: var(--r-mini); background: var(--g-track); white-space: nowrap; }
+.fh-ragpill.green { color: var(--rag-g); background: color-mix(in srgb, var(--rag-g-dot) 14%, transparent); } .fh-ragpill.yellow { color: var(--rag-y); background: color-mix(in srgb, var(--rag-y-dot) 16%, transparent); } .fh-ragpill.red { color: var(--rag-r); background: color-mix(in srgb, var(--rag-r-dot) 13%, transparent); }
+.fh-raglegend { display: inline-flex; flex-wrap: wrap; gap: 6px; margin-left: auto; align-self: center; }
+.fh-tag[aria-pressed="true"] .fh-rag { box-shadow: 0 0 0 2px rgba(255,255,255,.7); }
+.fh-mhead { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 6px; }
+.fh-mhead .fh-mname, .fh-mhead h3 { margin: 0; }
+.fh-why { margin: 0 0 14px; font-size: 14px; line-height: 1.5; max-width: 70ch; }
+.fh-srclist { display: flex; flex-direction: column; gap: 5px; }
+.fh-srcline { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0 4px; } .fh-srcline small { color: var(--color-fg-muted); }
+.fh-tbl td.fh-wrap { white-space: normal; min-width: 14rem; max-width: 28rem; }
+#src-health .fh-tbl { max-height: none; }
+.fh-health { display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; background: color-mix(in srgb, var(--color-panel) 35%, transparent); }
+.fh-hrow { display: grid; grid-template-columns: 6rem minmax(0, 1.4fr) 11rem 10rem minmax(0, 1.3fr) 6.5rem; gap: 12px 16px; padding: 12px 14px; border-bottom: 0.5px solid var(--cds-chart-grid); font-size: 13.5px; align-items: start; }
+.fh-hrow > span { min-width: 0; line-height: 1.4; }
+.fh-hhead { font-size: 12px; font-weight: 600; color: var(--color-fg-muted); background: var(--g-fill-strong); border-bottom: 0.5px solid var(--cds-chart-axis); }
+.fh-hrow small { color: var(--color-fg-muted); display: block; margin-top: 3px; line-height: 1.4; }
+.fh-hrow code { font-size: 0.8em; display: inline-block; margin-top: 3px; }
+.fh-partial { color: var(--rag-y) !important; }
+.fh-needed { display: flex; flex-wrap: wrap; gap: 4px; }
+.fh-need { font-size: 12px; padding: 2px 7px; border-radius: var(--r-mini); background: var(--g-track); }
+.fh-need.alt { color: var(--color-fg-muted); background: transparent; box-shadow: inset 0 0 0 1px var(--cds-chart-axis); }
+.fh-rag.none { background: transparent; box-shadow: inset 0 0 0 1.5px var(--cds-chart-axis); }
+@media (max-width: 1000px) { .fh-hrow { grid-template-columns: 6rem minmax(0, 1fr); } .fh-hhead { display: none; } .fh-hrow > span:nth-child(n+3) { grid-column: 2; } .fh-hrow > .fh-dash { display: none; } }
+#m-def details.fh-all { margin-bottom: 16px; }
+.fh-logic-top { margin-bottom: 12px; }
+.fh-msec { margin: 0 0 18px; }
+#m-def .fh-mhead { margin-bottom: 16px; }
+.fh-msec h4 { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--color-fg-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.fh-syschips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.fh-sys { font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: var(--r-pill); background: var(--g-track); }
+.fh-tlist { border-radius: 12px; overflow: hidden; background: color-mix(in srgb, var(--color-panel) 35%, transparent); }
+.fh-trow { display: grid; grid-template-columns: 14px minmax(0, 1fr) 12rem 7rem; gap: 4px 12px; align-items: center; padding: 10px 12px; border-bottom: 0.5px solid var(--cds-chart-grid); font-size: 13.5px; }
+.fh-trow:last-child { border-bottom: 0; }
+.fh-trow .fh-rag { margin: 0; }
+.fh-tname code { font-size: 0.8em; color: var(--color-fg-muted); word-break: break-word; }
+.fh-tname small { color: var(--color-fg-muted); }
+.fh-twhen { font-size: 12px; color: var(--color-fg-muted); }
+.fh-trow .fh-link { justify-self: end; }
+.fh-link { font: inherit; font-size: 13px; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 4px 0; cursor: pointer; white-space: nowrap; }
+.fh-link:hover { text-decoration: underline; } .fh-link:focus-visible { outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent); border-radius: 4px; }
+.fh-how { border-radius: 14px; padding: 14px 16px; background: color-mix(in srgb, var(--accent) 6%, transparent); }
+.fh-how p { margin: 0 0 6px; font-size: 14px; line-height: 1.55; max-width: 85ch; } .fh-how p:last-child { margin: 0; }
+.fh-how b { display: inline-block; min-width: 5.5rem; font-weight: 600; }
+.fh-used { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.fh-usedbtn { padding: 6px 12px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.fh-usedtxt { font-size: 13px; color: var(--color-fg-muted); }
+@media (max-width: 640px) { .fh-trow { grid-template-columns: 14px minmax(0, 1fr); } .fh-trow > .fh-twhen, .fh-trow > .fh-link, .fh-trow > span:last-child { grid-column: 2; } .fh-trow .fh-link { justify-self: start; } .fh-how b { display: block; } }
+.fh-live-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--color-ok); margin-right: 7px; vertical-align: 1px; }
+.fh-chip[aria-pressed="true"] .fh-live-dot { background: var(--on-accent); }
+.fh-badge { display: inline-block; margin-top: 8px; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: var(--r-mini); background: var(--g-track); color: var(--color-fg-muted); }
+.fh-badge.live { background: color-mix(in srgb, var(--color-ok) 14%, transparent); color: var(--color-ok); }
+.fh-chip small { color: var(--color-fg-muted); font-weight: 400; margin-left: 5px; }
+.fh-tags { gap: 12px; }
+.fh-taggroup { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+@media (min-width: 760px) { .fh-taggroup { grid-template-columns: 11rem minmax(0, 1fr); align-items: start; gap: 16px; } .fh-taglbl { padding-top: 9px; } .fh-taggroup + .fh-taggroup { border-top: 0.5px solid var(--cds-chart-grid); padding-top: 12px; } }
+.fh-taglbl { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-fg-muted); }
+.fh-tagrow { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.fh-logic { display: grid; gap: 16px 24px; grid-template-columns: minmax(0, 1fr); margin: 8px 0 20px; }
+@media (min-width: 900px) { .fh-logic { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.fh-logic div { min-width: 0; }
+.fh-logic dt { font-size: 11.5px; font-weight: 600; color: var(--color-fg-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.fh-logic dd { margin: 0; font-size: 14px; line-height: 1.5; }
+.fh-logic code, .fh-code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 0.85em; background: var(--g-track); padding: 1px 6px; border-radius: 6px; }
+.fh-mname { font-family: var(--fh-display); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; margin: 0 0 8px; }
+.fh-tools { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-bottom: 16px; }
+.fh-tools .fh-search { margin: 0; }
+.fh-goals { display: flex; flex-direction: column; justify-content: center; gap: 28px; flex: 1; }
+.fh-goal-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 14px; }
+.fh-goal-top b { font-family: var(--fh-display); font-size: 1.5rem; letter-spacing: -0.02em; }
+.fh-goal-sub { font-size: 12px; color: var(--color-fg-muted); margin-top: 6px; }
+.fh-count { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+details.fh-all summary { cursor: pointer; font-size: 14px; font-weight: 600; padding: 4px 0; color: var(--accent); }
+details.fh-all .fh-defrow { padding: 10px 0; border-top: 0.5px solid var(--cds-chart-axis); }
+[data-dash-source-state=empty] { color: transparent; }
+[data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .fh-bar-top, .fh-card, .fh-tile, .fh-tag, .fh-chip { background: var(--g-fill-strong); } }
+@media (prefers-reduced-motion: reduce) { .seg button, .fh-tile, .fh-chip, .fh-tag { transition: none; } .fh-tile:hover, .fh-chip:hover, .fh-tag:hover { transform: none; } }
+@media (max-width: 640px) { .fh-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .fh-tile { padding: 14px; } .fh-tile .val { font-size: 1.4rem !important; } .fh-bar-top { position: static; padding: 16px; } .fh-card { padding: 16px; } .fh-title { font-size: 1.5rem; } }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+</head><body><div id="dash-root">
+<div class="fh" id="fh">
+  <header class="fh-bar-top glass">
+    <div class="fh-brand">
+      <p class="fh-eyebrow">DeWitt Law</p>
+      <h1 class="fh-title">Firm Health</h1>
+      <p class="fh-sub"><span class="fh-sample" id="fh-asof">Connecting…</span><span class="fh-range" id="range-label"></span></p>
+    </div>
+    <div class="seg big" role="tablist" aria-label="View">
+      <button role="tab" data-view="dashboard" id="view-dashboard" aria-selected="true">Dashboard</button>
+      <button role="tab" data-view="data" id="view-data" aria-selected="false" aria-disabled="true" disabled title="Data view is not available yet"><svg class="fh-lock" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path fill="currentColor" d="M5 7V5a3 3 0 0 1 6 0v2h.5A1.5 1.5 0 0 1 13 8.5v5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 13.5v-5A1.5 1.5 0 0 1 4.5 7H5Zm1.5 0h3V5a1.5 1.5 0 0 0-3 0v2Z"/></svg>Data</button>
+    </div>
+    <div class="fh-filters" aria-label="Date filter">
+      <div class="seg" id="presets" role="group" aria-label="Period">
+        <button data-preset="ytd">YTD</button><button data-preset="l30">30 days</button><button data-preset="l90">90 days</button><button data-preset="custom">Custom</button>
+      </div>
+      <label for="f-start">From <input class="fh-in" id="f-start" type="date" min="2000-01-01" max="2099-12-31"></label>
+      <label for="f-end">To <input class="fh-in" id="f-end" type="date" min="2000-01-01" max="2099-12-31"></label>
+    </div>
+  </header>
+
+  <!-- ============ DASHBOARD ============ -->
+  <div class="fh-view" id="dashboard">
+    <div class="seg fh-tabs" role="tablist" aria-label="Dashboard tabs" id="tabs">
+      <button role="tab" data-tab="exec" aria-selected="true">Executive Scorecard</button>
+      <button role="tab" data-tab="revenue">Revenue</button>
+      <button role="tab" data-tab="intake">Intake</button>
+      <button role="tab" data-tab="marketing">Marketing</button>
+      <button role="tab" data-tab="cases">Case Progress</button>
+      <button role="tab" data-tab="highvalue">High Value Cases</button>
+      <button role="tab" data-tab="attorneys">Attorney Performance</button>
+    </div>
+
+    <!-- 1. Executive Scorecard -->
+    <section class="fh-sec" id="exec">
+      <h2>Money<small id="exec-money-note">QuickBooks · trend line = value to date within the period</small></h2>
+      <div class="fh-tiles" id="exec-money"></div>
+      <h2>Efficiency and pipeline<small>QuickBooks · CasePeer · Lead Docket · Ads</small></h2>
+      <div class="fh-tiles" id="exec-eff"></div>
+      <div class="fh-grid">
+        <div class="fh-card"><h3>Revenue vs costs by month</h3><p class="note">QuickBooks, months inside the selected period.</p><div class="fh-chart" id="c-revcost" data-source="metrics_daily"></div></div>
+        <div class="fh-card"><h3>Operating margin by month</h3><p class="note">(Revenue − total expenses) ÷ revenue.</p><div class="fh-chart" id="c-margin" data-source="metrics_daily"></div></div>
+        <div class="fh-card"><h3>Google Ads spend, daily</h3><p class="note">Three Google Ads accounts combined.</p><div class="fh-chart" id="c-gads" data-source="metrics_daily"></div></div>
+        <div class="fh-card"><h3>Meta Ads spend, daily</h3><p class="note">Facebook / Instagram.</p><div class="fh-chart" id="c-meta" data-source="metrics_daily"></div></div>
+      </div>
+      <p class="fh-def">Total pipeline value = active cases × average fee ($19,500, a fixed parameter the firm can change). No probability weighting in phase 1. The date filter applies to this tab; other tabs show a fixed sample in this preview.</p>
+    </section>
+
+  <!-- 2. Revenue -->
+  <section class="fh-sec" id="revenue" hidden>
+    <h2>Fees and goals<small>Lead Docket settlement fees · goals sheet</small></h2>
+    <div class="fh-tiles" id="rev-tiles"></div>
+    <div class="fh-grid">
+      <div class="fh-card"><h3>Goal progress</h3><p class="note">Fees collected vs the monthly and annual goal.</p><div class="fh-goals" id="rev-goals"></div></div>
+      <div class="fh-card"><h3>Average fee per closed case</h3><p class="note">Rolling 12-month average, by month of settlement.</p><div class="fh-chart" id="c-avgfee" data-source="monthly"></div></div>
+      <div class="fh-card"><h3>Average fee per case type</h3><p class="note">Cases settled in the last 12 months.</p><div class="fh-chart" id="c-feetype" data-source="fee_by_type"></div></div>
+      <div class="fh-card"><h3>Litigation vs non-litigation revenue</h3><p class="note">By month, 2026. Split rule to agree: CasePeer litigation flag or QuickBooks PI / Family Law.</p><div class="fh-chart" id="c-litrev" data-source="monthly"></div></div>
+    </div>
+  </section>
+
+  <!-- 3. Intake -->
+  <section class="fh-sec" id="intake" hidden>
+    <h2>Signed cases<small>Lead Docket</small></h2>
+    <div class="fh-tiles" id="intake-tiles"></div>
+    <div class="fh-grid">
+      <div class="fh-card"><h3>Lead funnel, last 30 days</h3><p class="note">Leads → wanted → signed. Sum over all marketing sources.</p><div class="fh-chart" id="c-funnel" data-source="funnel"></div></div>
+      <div class="fh-card"><h3>Intake workers</h3><p class="note">Last 30 days. Arrow = change vs the 30 days before.</p>
+        <div class="fh-tbl"><table id="t-intake" data-source="intake_workers" data-row-key="worker"><thead><tr>
+          <th data-field="worker">Intake worker</th><th class="num" data-field="leads_handled">Leads handled</th><th class="num" data-field="wanted">Wanted</th><th class="num" data-field="signed">Signed</th><th class="num" data-field="wanted_signed_pct">% wanted signed</th><th class="num" data-field="wanted_signed_pct_prev">Prior 30 days</th>
+        </tr></thead><tbody></tbody></table></div></div>
+    </div>
+  </section>
+
+  <!-- 4. Marketing -->
+  <section class="fh-sec" id="marketing" hidden>
+    <h2>Spend and leads by source<small>Google Ads · Meta Ads · Lead Docket. Spend by source needs the firm’s UTM / campaign mapping table.</small></h2>
+    <div class="fh-tiles" id="mkt-tiles"></div>
+    <div class="fh-card"><h3>By marketing source, last 30 days</h3><p class="note">Spend is ad-platform cost mapped to the Lead Docket source. Sources without paid spend show no cost figures.</p>
+      <div class="fh-tbl"><table id="t-sources" data-source="marketing_sources" data-row-key="source"><thead><tr>
+        <th data-field="source">Source</th><th class="num" data-field="leads">Leads</th><th class="num" data-field="wanted">Wanted</th><th class="num" data-field="signed">Signed</th><th class="num" data-field="spend">Spend</th><th class="num" data-field="cost_per_wanted">Cost / wanted</th><th class="num" data-field="cost_per_signed">Cost / signed</th><th class="num" data-field="lead_to_signed">Lead → signed</th><th class="num" data-field="wanted_to_signed">Wanted → signed</th>
+      </tr></thead><tbody></tbody></table></div></div>
+    <div class="fh-card"><h3>Cost per signed lead by source, daily</h3><p class="note">Paid sources only, last 31 days.</p><div class="fh-chart" id="c-cps" data-source="cost_per_signed_daily"></div></div>
+  </section>
+
+  <!-- 5. Case Progress -->
+  <section class="fh-sec" id="cases" hidden>
+    <h2>Inventory<small>CasePeer</small></h2>
+    <div class="fh-grid">
+      <div class="fh-card"><h3>Cases by stage</h3><p class="note">Active cases today.</p><div class="fh-chart" id="c-stage" data-source="cases_by_stage"></div></div>
+      <div class="fh-card"><h3>Average days in stage</h3><p class="note">From daily stage snapshots.</p><div class="fh-chart" id="c-stagedays" data-source="cases_by_stage"></div></div>
+    </div>
+    <h2>Attention needed<small>today</small></h2>
+    <div class="fh-tiles" id="case-alerts"></div>
+    <h2>Stage aging<small>Cases over the stage threshold. Click a tile to filter the case list.</small></h2>
+    <div class="fh-tiles" id="case-aging"></div>
+    <div class="fh-card"><h3 id="dd-title">Case list</h3><p class="note" id="dd-note">All active cases in the sample. Click a stage-aging tile to filter.</p>
+      <input class="fh-search" id="dd-search" type="search" placeholder="Search case, attorney, case manager" aria-label="Search cases">
+      <div class="fh-tbl"><table id="t-cases" data-source="case_list" data-row-key="case"><thead><tr>
+        <th data-field="case">Case</th><th data-field="stage">Stage</th><th class="num" data-field="days_in_stage">Days in stage</th><th data-field="attorney">Attorney</th><th data-field="case_manager">Case manager</th><th data-field="case_type">Type</th><th class="num" data-field="last_touch_days">Days since last touch</th><th class="num" data-field="sol_days">Days to SOL</th>
+      </tr></thead><tbody></tbody></table></div></div>
+    <h2>Case load<small>litigation vs non-litigation</small></h2>
+    <div class="fh-grid">
+      <div class="fh-card"><h3>Cases per attorney</h3><p class="note">Active cases by lead attorney.</p><div class="fh-chart" id="c-loadatt" data-source="load_by_attorney"></div></div>
+      <div class="fh-card"><h3>Cases per case manager</h3><p class="note">Active cases by case manager.</p><div class="fh-chart" id="c-loadcm" data-source="load_by_cm"></div></div>
+    </div>
+  </section>
+
+  <!-- 6. High Value Cases -->
+  <section class="fh-sec" id="highvalue" hidden>
+    <h2>High-value indicators<small>CasePeer · active cases</small></h2>
+    <div class="fh-tiles" id="hv-tiles"></div>
+    <p class="fh-def">Medical bills = sum of original bills. Limits = Defendant 1 (BI) first, then UM/UIM. Catastrophic = bills over $500k or case type Wrongful Death.</p>
+    <div class="fh-card"><h3>Top 25 most valuable cases</h3><p class="note">Ranked by collectable value = the smaller of original bills and available limits (Def 1 + UM/UIM). Ranking rule to confirm with the firm.</p>
+      <div class="fh-tbl"><table id="t-top25" data-source="top25" data-row-key="case"><thead><tr>
+        <th class="num" data-field="rank">#</th><th data-field="case">Case</th><th data-field="attorney">Attorney</th><th class="num" data-field="original_bills">Original bills</th><th class="num" data-field="def1_limits">Def 1 limits</th><th class="num" data-field="um_uim_limits">UM / UIM</th><th class="num" data-field="collectable">Collectable</th><th data-field="indicators">Indicators</th>
+      </tr></thead><tbody></tbody></table></div></div>
+  </section>
+
+  <!-- 7. Attorney Performance -->
+  <section class="fh-sec" id="attorneys" hidden>
+    <h2>Per attorney<small>CasePeer · click a column header to sort</small></h2>
+    <div class="fh-card"><h3>Attorney scorecard</h3><p class="note">Fees from Lead Docket settlements, joined to the CasePeer lead attorney (join key to confirm). Case counts are active cases today.</p>
+      <div class="fh-tbl"><table id="t-att" data-source="attorney_perf" data-row-key="attorney"><thead><tr>
+        <th data-field="attorney">Attorney</th><th class="num" data-field="fees_mtd">Fees MTD</th><th class="num" data-field="fees_ytd">Fees YTD</th><th class="num" data-field="avg_fee_ytd">Avg fee YTD</th><th class="num" data-field="open_cases">Open cases</th><th class="num" data-field="litigation">Litigation</th><th class="num" data-field="non_litigation">Non-lit</th><th class="num" data-field="avg_case_age_days">Avg case age (days)</th><th class="num" data-field="pending_lit_30">Pending lit 30+</th><th class="num" data-field="service_30">Service 30+</th><th class="num" data-field="in_trial">In trial</th><th class="num" data-field="over_1y">Over 1 yr</th><th class="num" data-field="over_2y">Over 2 yrs</th><th class="num" data-field="demands_sent">Demands sent</th><th class="num" data-field="cases_settled">Settled</th>
+      </tr></thead><tbody></tbody></table></div></div>
+    <div class="fh-grid">
+      <div class="fh-card"><h3>Fees collected YTD by attorney</h3><p class="note">Lead Docket settlement fees, Jan 1 – today.</p><div class="fh-chart" id="c-attfees" data-source="attorney_perf"></div></div>
+      <div class="fh-card"><h3>Average case age by attorney</h3><p class="note">Days since case opened, active cases. "Time on attorney desk" per the firm.</p><div class="fh-chart" id="c-attage" data-source="attorney_perf"></div></div>
+    </div>
+  </section>
+  </div>
+
+  <!-- ============ DATA ============ -->
+  <div class="fh-view" id="data" hidden>
+    <div class="seg fh-tabs" role="tablist" aria-label="Data tabs" id="dtabs">
+      <button role="tab" data-dtab="calc" aria-selected="true">Calculated metrics (daily)</button>
+      <button role="tab" data-dtab="raw">Raw data by source</button>
+    </div>
+
+    <section class="fh-sec" id="calc">
+      <div class="fh-card fh-tags" id="m-tags" role="group" aria-label="Metric"></div>
+      <div class="fh-card">
+        <div id="m-def"></div>
+        <p class="fh-def" id="m-nodata" hidden></p>
+        <div id="m-series">
+        <div class="fh-tools">
+          <input class="fh-search" id="m-search" type="search" placeholder="Filter days, e.g. 2026-09" aria-label="Filter days">
+          <span class="fh-count" id="m-count"></span>
+        </div>
+        <div class="fh-tbl"><table id="t-metric" data-source="metrics_daily" data-row-key="day"><thead></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fh-sec" id="raw" hidden>
+      <div class="fh-card" id="src-health"></div>
+      <div class="fh-chips" id="src-chips" role="group" aria-label="Source table"></div>
+      <div class="fh-card">
+        <div id="src-def"></div>
+        <div class="fh-tools">
+          <label class="fh-count" for="r-datecol">Date column</label><select class="fh-in" id="r-datecol"></select>
+          <label class="fh-count" for="r-status" id="r-status-lbl">Status</label><select class="fh-in" id="r-status"></select>
+          <input class="fh-search" id="r-search" type="search" placeholder="Search rows" aria-label="Search rows">
+          <span class="fh-count" id="r-count"></span>
+        </div>
+        <div class="fh-tbl"><table id="t-raw"><thead></thead><tbody></tbody></table></div>
+      </div>
+    </section>
+  </div>
+</div>
+</div><script>/* client build: Data section locked */ window.FH_LOCK_DATA = true; if (/^#(calc|raw|data)$/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);</script><script src="loader.js"></script></body></html>

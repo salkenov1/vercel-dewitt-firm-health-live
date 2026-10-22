@@ -1,0 +1,8 @@
+{
+  "headers": [
+    { "source": "/(.*)", "headers": [{ "key": "X-Robots-Tag", "value": "noindex, nofollow" }] }
+  ],
+  "functions": {
+    "api/metrics.mjs": { "maxDuration": 60, "memory": 1024 }
+  }
+}

@@ -280,9 +280,49 @@ async function build(since) {
   return data;
 }
 
+// Two ways to reach the warehouse, chosen by which variables are set.
+//
+//   GCP_SA_KEY_B64            -> query BigQuery straight from here (preferred)
+//   METRICS_URL + DASH_TOKEN  -> proxy to the Cloud Run metrics service
+//
+// The second exists because creating a service-account key needs IAM roles we
+// do not hold yet, while deploying a Cloud Run service needs only roles we
+// already have. When the key arrives, set GCP_SA_KEY_B64 and remove the other
+// two: this file takes the direct path again with no code change.
+function mode() {
+  if (process.env.GCP_SA_KEY_B64) return 'bigquery';
+  if (process.env.METRICS_URL && process.env.DASH_TOKEN) return 'cloudrun';
+  return 'unconfigured';
+}
+
+async function fromCloudRun(since) {
+  const url = new URL(process.env.METRICS_URL);
+  url.searchParams.set('since', since);
+  const r = await fetch(url, {
+    headers: { Authorization: `Bearer ${process.env.DASH_TOKEN}` },
+    signal: AbortSignal.timeout(60000),
+  });
+  const text = await r.text();
+  let body;
+  try {
+    body = JSON.parse(text);
+  } catch {
+    throw new Error('the metrics service did not return JSON');
+  }
+  if (!r.ok || body.error) throw new Error(body.error || `metrics service HTTP ${r.status}`);
+  return body;
+}
+
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
+
+  const how = mode();
+  if (how === 'unconfigured') {
+    return res.status(500).end(JSON.stringify({
+      error: 'Not configured. Set GCP_SA_KEY_B64, or METRICS_URL together with DASH_TOKEN.',
+    }));
+  }
 
   const since = typeof req.query?.since === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(req.query.since)
     ? req.query.since : SINCE_DEFAULT;
@@ -294,8 +334,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = await build(since);
-    if (!body.metrics_daily.length) {
+    const body = how === 'cloudrun' ? await fromCloudRun(since) : await build(since);
+    if (!body.metrics_daily?.length) {
       return res.status(200).end(JSON.stringify({
         ...body,
         _empty: true,
@@ -308,7 +348,9 @@ export default async function handler(req, res) {
   } catch (err) {
     // Surface enough to debug, never the key or the full stack.
     const msg = String(err?.message || err);
-    const safe = msg.includes('GCP_SA_KEY_B64') ? msg
+    const safe = msg.includes('metrics service') ? msg
+      : err?.name === 'TimeoutError' ? 'the metrics service took too long to answer'
+      : msg.includes('GCP_SA_KEY_B64') ? msg
       : msg.includes('Permission') || msg.includes('403')
         ? 'The service account cannot read the gold dataset.'
         : msg.includes('Not found') || msg.includes('404')

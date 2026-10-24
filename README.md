@@ -75,6 +75,30 @@ carrying invented numbers.
 
 ---
 
+## Two ways to reach the warehouse
+
+`api/metrics.mjs` picks its path from the variables that are set:
+
+| Set these | What happens |
+| --- | --- |
+| `GCP_SA_KEY_B64` | queries BigQuery directly from the Vercel function. Preferred. |
+| `METRICS_URL` + `DASH_TOKEN` | proxies to the Cloud Run service in `metrics-api/` |
+
+The second mode exists because of an access gap, not a design preference.
+Creating a service-account key needs `roles/iam.serviceAccountAdmin` and
+`roles/iam.serviceAccountKeyAdmin`, which we do not hold. Deploying a Cloud
+Run service needs `roles/run.admin` and `roles/iam.serviceAccountUser`, which
+we do. So the Cloud Run route is live today and the direct route is not.
+
+When the key arrives: set `GCP_SA_KEY_B64`, remove the other two, redeploy.
+No code changes. The Cloud Run service can then be deleted.
+
+The trade-off while in Cloud Run mode: that service runs as the project's
+default compute account, which can write as well as read. It is a read-only
+endpoint behind a bearer token, so a leaked token means someone can read
+BigQuery, not write to it. Worse than a dedicated read-only account, better
+than no dashboard.
+
 ## Environment variables
 
 Set these on the Vercel project (Settings → Environment Variables), for
@@ -82,7 +106,9 @@ Production and Preview:
 
 | Name | Required | Value |
 | --- | --- | --- |
-| `GCP_SA_KEY_B64` | **yes** | the service-account JSON key, base64-encoded |
+| `GCP_SA_KEY_B64` | mode 1 | the service-account JSON key, base64-encoded |
+| `METRICS_URL` | mode 2 | the Cloud Run service URL |
+| `DASH_TOKEN` | mode 2 | the bearer token, same value as the Secret Manager entry |
 | `GCP_PROJECT_ID` | no | defaults to `unified-century-504515-d4` |
 | `BQ_LOCATION` | no | defaults to `US` |
 | `DASH_SINCE` | no | first day served, defaults to `2025-01-01` |

@@ -13,7 +13,9 @@ const PROJECT = process.env.GCP_PROJECT_ID || 'unified-century-504515-d4';
 const LOCATION = process.env.BQ_LOCATION || 'US';
 const SINCE_DEFAULT = process.env.DASH_SINCE || '2025-01-01';
 const CACHE_MS = Number(process.env.DASH_CACHE_SECONDS || 900) * 1000;
-const AVG_FEE = Number(process.env.DASH_AVG_FEE || 19500);
+// DASH_AVG_FEE is gone: the pipeline-value multiplier now lives in Dataform
+// (workflow_settings.yaml vars.avg_fee), so gold.metrics_daily.pipeline_value
+// arrives already computed. Setting it here would have had no effect.
 
 let client = null;
 let schemaHasMarketing = null;          // probed once per cold start
@@ -49,11 +51,16 @@ async function q(sql, params) {
 }
 
 // --------------------------------------------------------------------------
-// gold.metrics_daily is the spine. The version currently deployed is v1,
-// which has revenue and costs as NULL and no marketing or ga column at all.
-// Probe once; if those columns are missing, derive the daily series from the
-// silver models instead so the Executive Scorecard still has its money tiles.
-// Pushing metrics_daily.sqlx v2 makes the fast path apply automatically.
+// gold.metrics_daily is the spine, and the only table this dashboard reads a
+// daily series from. v2 is deployed: all 22 columns, with revenue, costs,
+// marketing and ga populated.
+//
+// The probe stays as a guard, not a router. If those columns ever disappear
+// the request fails with a message naming the cause, rather than silently
+// serving blank money tiles. There is deliberately no silver fallback: the
+// dashboard service account holds READ on `gold` alone, and silver's models
+// are VIEWS over firm_health, so reading them would mean giving bronze access
+// to a credential that lives in a browser-facing function.
 // --------------------------------------------------------------------------
 
 const Q_PROBE = `
@@ -70,72 +77,6 @@ SELECT day, revenue, costs, personnel, marketing, ga, fees_collected,
 FROM \`gold.metrics_daily\`
 WHERE day >= PARSE_DATE('%Y-%m-%d', @since)
 ORDER BY day`;
-
-const Q_DAILY_SILVER = `
-WITH spine AS (SELECT d AS day FROM UNNEST(GENERATE_DATE_ARRAY(
-                 PARSE_DATE('%Y-%m-%d', @since), CURRENT_DATE('America/New_York'))) AS d),
-cs AS (SELECT * FROM \`silver.cp_cases\`),
-fee AS (SELECT case_id, check_date, payment_amount FROM \`silver.cp_trusts\`
-        WHERE is_attorney_fee AND NOT is_void
-          AND check_date IS NOT NULL AND payment_amount IS NOT NULL),
-ld AS (SELECT l.created_date, l.is_signed, l.signed_date_proxy,
-              COALESCE(s.is_wanted, FALSE) AS is_wanted
-       FROM \`silver.ld_leads\` l LEFT JOIN \`silver.ld_statuses\` s USING (status_id)),
-f_leads AS (SELECT created_date AS day, COUNT(*) AS leads, COUNTIF(is_wanted) AS wanted_leads
-            FROM ld WHERE created_date IS NOT NULL GROUP BY day),
-f_signed AS (SELECT signed_date_proxy AS day, COUNT(*) AS cases_signed
-             FROM ld WHERE is_signed AND signed_date_proxy IS NOT NULL GROUP BY day),
-f_dem AS (SELECT sent_date AS day, COUNT(*) AS demands_sent
-          FROM \`silver.cp_demands\` WHERE sent_date IS NOT NULL GROUP BY day),
-f_fee AS (SELECT check_date AS day, ROUND(SUM(payment_amount),2) AS fees_collected,
-                 COUNT(DISTINCT case_id) AS cases_settled FROM fee GROUP BY day),
-f_sp AS (SELECT date_day AS day,
-           ROUND(SUM(IF(platform='google_ads',spend,0)),2)   AS ad_spend_google,
-           ROUND(SUM(IF(platform='facebook_ads',spend,0)),2) AS ad_spend_meta
-         FROM \`silver.ad_spend_daily\` GROUP BY day),
-f_gl AS (SELECT txn_date AS day,
-           ROUND(SUM(IF(classification='Revenue' AND source='deposit', amount,0)),2) AS revenue,
-           ROUND(SUM(IF(classification='Expense', amount,0)),2)                      AS costs,
-           ROUND(SUM(IF(classification='Expense' AND category='Personnel Expenses', amount,0)),2) AS personnel,
-           ROUND(SUM(IF(classification='Expense' AND category='Marketing Expenses', amount,0)),2) AS marketing,
-           ROUND(SUM(IF(classification='Expense' AND category LIKE 'General%', amount,0)),2)      AS ga
-         FROM \`silver.qb_gl_lines\`
-         WHERE fully_qualified_name IS NOT NULL AND NOT is_trust GROUP BY day),
-s_c AS (SELECT sp.day, COUNT(*) AS active_cases,
-               COUNTIF(c.statute_date <= DATE_ADD(sp.day, INTERVAL 180 DAY)) AS sol_6m
-        FROM spine sp JOIN cs c ON c.created_date <= sp.day
-         AND (c.closed_date IS NULL OR c.closed_date > sp.day) GROUP BY sp.day),
-s_d AS (SELECT sp.day, COUNT(*) AS open_demands_30 FROM spine sp
-        JOIN \`silver.cp_demands\` d ON d.sent_date < DATE_SUB(sp.day, INTERVAL 30 DAY)
-         AND NOT COALESCE(d.offer_accepted, FALSE)
-        JOIN cs c ON c.case_id = d.case_id AND c.created_date <= sp.day
-         AND (c.closed_date IS NULL OR c.closed_date > sp.day) GROUP BY sp.day),
-s_f AS (SELECT sp.day, ROUND(SAFE_DIVIDE(SUM(f.payment_amount),
-                 NULLIF(COUNT(DISTINCT f.case_id),0)),2) AS avg_fee_12m
-        FROM spine sp JOIN fee f ON f.check_date > DATE_SUB(sp.day, INTERVAL 12 MONTH)
-         AND f.check_date <= sp.day GROUP BY sp.day)
-SELECT sp.day,
-  COALESCE(f_gl.revenue,0) AS revenue, COALESCE(f_gl.costs,0) AS costs,
-  COALESCE(f_gl.personnel,0) AS personnel, COALESCE(f_gl.marketing,0) AS marketing,
-  COALESCE(f_gl.ga,0) AS ga,
-  COALESCE(f_fee.fees_collected,0) AS fees_collected,
-  COALESCE(f_signed.cases_signed,0) AS cases_signed,
-  COALESCE(f_leads.leads,0) AS leads, COALESCE(f_leads.wanted_leads,0) AS wanted_leads,
-  COALESCE(f_sp.ad_spend_google,0) AS ad_spend_google,
-  COALESCE(f_sp.ad_spend_meta,0) AS ad_spend_meta,
-  COALESCE(f_dem.demands_sent,0) AS demands_sent,
-  COALESCE(f_fee.cases_settled,0) AS cases_settled,
-  s_c.active_cases,
-  CAST(ROUND(COALESCE(s_c.active_cases,0) * @avgFee) AS INT64) AS pipeline_value,
-  s_f.avg_fee_12m, s_c.sol_6m, COALESCE(s_d.open_demands_30,0) AS open_demands_30,
-  CAST(NULL AS FLOAT64) AS avg_file_days,
-  CAST(NULL AS INT64) AS contact_overdue,
-  CAST(NULL AS INT64) AS no_activity_30
-FROM spine sp
-LEFT JOIN f_leads USING (day) LEFT JOIN f_signed USING (day) LEFT JOIN f_dem USING (day)
-LEFT JOIN f_fee USING (day) LEFT JOIN f_sp USING (day) LEFT JOIN f_gl USING (day)
-LEFT JOIN s_c USING (day) LEFT JOIN s_d USING (day) LEFT JOIN s_f USING (day)
-ORDER BY sp.day`;
 
 const Q_MONTHLY = `
 SELECT FORMAT_DATE('%Y-%m', month) AS month,
@@ -259,8 +200,16 @@ async function build(since) {
     const [{ n }] = await q(Q_PROBE);
     schemaHasMarketing = Number(n) === 2;
   }
-  const dailySql = schemaHasMarketing ? Q_DAILY_GOLD : Q_DAILY_SILVER;
-  const dailyParams = schemaHasMarketing ? { since } : { since, avgFee: AVG_FEE };
+  if (!schemaHasMarketing) {
+    const e = new Error(
+      'gold.metrics_daily is missing the marketing/ga columns (v1 schema). ' +
+      'Push metrics_daily.sqlx v2 and re-run the Dataform workflow. ' +
+      'This dashboard reads gold only, by design, so there is no fallback.');
+    e.expose = true;
+    throw e;
+  }
+  const dailySql = Q_DAILY_GOLD;
+  const dailyParams = { since };
 
   const [metrics_daily, monthly, cases_by_stage, load_by_attorney,
     load_by_cm, intake_workers, attorney_perf] = await Promise.all([
@@ -275,7 +224,7 @@ async function build(since) {
   };
   for (const k of EMPTY) data[k] = [];
   data._as_of = metrics_daily.length ? metrics_daily[metrics_daily.length - 1].day : null;
-  data._source = schemaHasMarketing ? 'gold.metrics_daily' : 'silver (gold.metrics_daily is v1)';
+  data._source = 'gold.metrics_daily';
   data._generated_at = new Date().toISOString();
   return data;
 }

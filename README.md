@@ -52,18 +52,26 @@ operating on the original data shape. Nothing was redesigned.
 | `attorney_perf` | `fct_caseload_daily` + `fct_fee_monthly` + `fct_demands_monthly`, joined on `attorney` |
 | `kpis` | derived in JS from `metrics_daily` — MTD, prior month, YTD, last 30 days |
 
-### The v1 / v2 fallback
+### gold only — and why there is no fallback
 
-`gold.metrics_daily` currently deployed is **v1**: `revenue` and `costs` are
-`NULL` and there is no `marketing` or `ga` column. The function probes
-`INFORMATION_SCHEMA` once per cold start:
+`gold.metrics_daily` is **v2**: all 22 columns, with `revenue`, `costs`,
+`marketing` and `ga` populated for every day. The function reads it directly.
 
-* columns present → reads `gold.metrics_daily` directly (fast path)
-* columns absent → derives the same 22 columns from the `silver` models
+An earlier version fell back to the `silver` models when those columns were
+missing. That fallback has been **removed**, and the `silver` grant with it,
+because it could not work and should not have:
 
-So the money tiles on the Executive Scorecard work today, and pushing
-`metrics_daily.sqlx` v2 switches it to the fast path with no code change. The
-response carries `_source` so you can see which path ran.
+* all nine `silver` objects are **views over `firm_health`** (bronze). Querying
+  a view needs permission on the tables beneath it, so `silver` access alone
+  always fails — and granting bronze would hand a browser-facing credential
+  access to the dataset holding client records.
+* the service account this app uses holds `roles/bigquery.dataViewer` on
+  **`gold` and nothing else**. That is verified behaviourally, not assumed:
+  reads of `firm_health` and `silver`, and writes anywhere, are all denied.
+
+The `INFORMATION_SCHEMA` probe is kept as a **guard, not a router**. If those
+columns ever vanish, the request fails with a message naming the cause rather
+than quietly serving blank money tiles.
 
 ### Panels left intentionally empty
 
@@ -75,29 +83,17 @@ carrying invented numbers.
 
 ---
 
-## Two ways to reach the warehouse
+## How it reaches the warehouse
 
-`api/metrics.mjs` picks its path from the variables that are set:
+`GCP_SA_KEY_B64` — a JSON key for `firm-health-dashboard@…`, base64-encoded.
+The function reads it server-side and queries BigQuery directly.
 
-| Set these | What happens |
-| --- | --- |
-| `GCP_SA_KEY_B64` | queries BigQuery directly from the Vercel function. Preferred. |
-| `METRICS_URL` + `DASH_TOKEN` | proxies to the Cloud Run service in `metrics-api/` |
-
-The second mode exists because of an access gap, not a design preference.
-Creating a service-account key needs `roles/iam.serviceAccountAdmin` and
-`roles/iam.serviceAccountKeyAdmin`, which we do not hold. Deploying a Cloud
-Run service needs `roles/run.admin` and `roles/iam.serviceAccountUser`, which
-we do. So the Cloud Run route is live today and the direct route is not.
-
-When the key arrives: set `GCP_SA_KEY_B64`, remove the other two, redeploy.
-No code changes. The Cloud Run service can then be deleted.
-
-The trade-off while in Cloud Run mode: that service runs as the project's
-default compute account, which can write as well as read. It is a read-only
-endpoint behind a bearer token, so a leaked token means someone can read
-BigQuery, not write to it. Worse than a dedicated read-only account, better
-than no dashboard.
+`api/metrics.mjs` still supports a second mode, `METRICS_URL` + `DASH_TOKEN`,
+which proxies to the Cloud Run service in `metrics-api/`. That existed only
+because we could not mint a key at the time, and it ran as the project's
+default compute account — which could write as well as read. **Do not use it.**
+The dedicated read-only account now exists, so the proxy mode is dead weight
+and `metrics-api/` can be deleted once this is live.
 
 ## Environment variables
 
@@ -106,14 +102,17 @@ Production and Preview:
 
 | Name | Required | Value |
 | --- | --- | --- |
-| `GCP_SA_KEY_B64` | mode 1 | the service-account JSON key, base64-encoded |
-| `METRICS_URL` | mode 2 | the Cloud Run service URL |
-| `DASH_TOKEN` | mode 2 | the bearer token, same value as the Secret Manager entry |
+| `GCP_SA_KEY_B64` | **yes** | the `firm-health-dashboard` JSON key, base64-encoded |
 | `GCP_PROJECT_ID` | no | defaults to `unified-century-504515-d4` |
 | `BQ_LOCATION` | no | defaults to `US` |
 | `DASH_SINCE` | no | first day served, defaults to `2025-01-01` |
 | `DASH_CACHE_SECONDS` | no | in-function cache, defaults to `900` |
-| `DASH_AVG_FEE` | no | pipeline-value multiplier, defaults to `19500` |
+
+`GCP_SA_KEY_B64` is the only one you have to set. `DASH_AVG_FEE` no longer
+exists — the pipeline-value multiplier lives in Dataform now
+(`workflow_settings.yaml`, `vars.avg_fee`), so `pipeline_value` arrives from
+gold already computed. `METRICS_URL` and `DASH_TOKEN` belong to the retired
+proxy mode above; leave them unset.
 
 The key is read only inside `api/metrics.mjs` and never reaches the browser.
 The browser calls `/api/metrics` and gets rows back. `middleware.js` gates that
@@ -121,41 +120,49 @@ route too, so an unauthenticated visitor gets the password page, not data.
 
 ---
 
-## What is still needed — and it is exactly one thing
+## The service account
 
-**A BigQuery service account and a JSON key for it.**
+`firm-health-dashboard@unified-century-504515-d4.iam.gserviceaccount.com`
+**already exists** and is scoped. Do not re-create it, and in particular do
+not add project-level roles or a `silver` grant — an earlier version of this
+file told you to, and that was wrong. What it holds:
+
+| Scope | Grant |
+| --- | --- |
+| project | `roles/bigquery.jobUser` — needed to run a query at all |
+| `gold` | `roles/bigquery.dataViewer` |
+| everything else | nothing |
+
+Verified by acting as the account: it reads `gold`, and is denied on
+`firm_health`, on `silver`, and on writes anywhere.
+
+All that is left is a key:
 
 ```bash
 PROJECT=unified-century-504515-d4
-SA=firm-health-dashboard
-
-gcloud iam service-accounts create "$SA" \
-  --display-name="Firm health dashboard (read-only)" --project "$PROJECT"
-
-for ROLE in roles/bigquery.dataViewer roles/bigquery.jobUser; do
-  gcloud projects add-iam-policy-binding "$PROJECT" \
-    --member "serviceAccount:${SA}@${PROJECT}.iam.gserviceaccount.com" \
-    --role "$ROLE"
-done
+SA=firm-health-dashboard@unified-century-504515-d4.iam.gserviceaccount.com
 
 gcloud iam service-accounts keys create /tmp/fh-key.json \
-  --iam-account "${SA}@${PROJECT}.iam.gserviceaccount.com" --project "$PROJECT"
+  --iam-account "$SA" --project "$PROJECT"
 
-base64 -w0 /tmp/fh-key.json          # paste this as GCP_SA_KEY_B64
-rm /tmp/fh-key.json
+base64 -w0 /tmp/fh-key.json          # paste as GCP_SA_KEY_B64 in Vercel
+shred -u /tmp/fh-key.json 2>/dev/null || rm -f /tmp/fh-key.json
 ```
 
-`roles/bigquery.dataViewer` at project level covers both `gold` and `silver`;
-`silver` is required for the v1 fallback path above. Scope it to the two
-datasets instead if you prefer.
+This needs `roles/iam.serviceAccountKeyAdmin`, which is granted.
 
-This needs `roles/iam.serviceAccountAdmin`, which is the role already on the
-open-items list. **Until it is granted this app cannot read BigQuery** — it
-will deploy, show its error panel, and say the warehouse could not be reached.
-There is no way around that from the application side: a credential has to
-exist for the function to use. Do not substitute the default compute account —
-it can write to everything in the project, and this is a read-only dashboard
-reachable from a browser.
+The key is a long-lived credential. It goes into the Vercel environment
+variable and nowhere else — never into git, never into Slack, never into a
+chat. If it leaks, revoke it:
+
+```bash
+gcloud iam service-accounts keys list --iam-account "$SA" --project "$PROJECT"
+gcloud iam service-accounts keys delete KEY_ID --iam-account "$SA" --project "$PROJECT"
+```
+
+Never substitute the default compute account. Until step 4 of the IAM
+migration it held `roles/editor`; even now it can build containers. This is a
+read-only dashboard reachable from a browser and it gets a read-only identity.
 
 ---
 
@@ -198,10 +205,14 @@ Failures are JSON with an `error` key:
 | `The service account cannot read the gold dataset.` | key is valid, roles are missing |
 | `A table the dashboard needs is missing from the warehouse.` | a gold table was dropped or renamed |
 
-Figures to sanity-check against the briefing, as of 22 Oct 2026:
+Figures to sanity-check, read from `gold.metrics_daily` on **28 Oct 2026**:
 
-* fees collected YTD — $4,372,695
-* cases signed YTD — 372
-* active cases — 696, pipeline value $13,572,000
+* fees collected YTD — $4,391,028
+* cases signed YTD — 376
+* active cases — 694, pipeline value $13,533,000
 * rolling 12-month average fee — $21,987
 * statute risk within 6 months — 168
+
+These move daily, so treat them as a shape check rather than exact targets: if
+the dashboard shows fees in the low millions and active cases near 700, it is
+reading the right tables. If it shows zeros or 2025 dates, it is not.

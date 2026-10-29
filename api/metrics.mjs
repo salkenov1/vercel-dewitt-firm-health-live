@@ -38,6 +38,21 @@ function bq() {
   return client;
 }
 
+// For panels whose gold table may not exist yet. A newly modelled metric is
+// deployed in two places - Dataform and here - and whichever lands first must
+// not take the dashboard down. On any failure the panel stays blank, exactly
+// as it was before the metric existed, and the reason is reported in _degraded
+// so a permanently empty panel is visible rather than silent.
+const degraded = [];
+async function qSafe(name, sql, params) {
+  try {
+    return await q(sql, params);
+  } catch (err) {
+    degraded.push({ panel: name, reason: String(err.message || err).slice(0, 200) });
+    return [];
+  }
+}
+
 async function q(sql, params) {
   const [rows] = await bq().query({ query: sql, location: LOCATION, params });
   // BigQuery hands dates back as objects; the UI wants ISO day strings.
@@ -66,6 +81,14 @@ async function q(sql, params) {
 const Q_PROBE = `
 SELECT COUNTIF(column_name IN ('marketing','ga')) AS n
 FROM \`gold.INFORMATION_SCHEMA.COLUMNS\` WHERE table_name = 'metrics_daily'`;
+
+// Metric 27. avg_fee is the all-time average; the model also carries
+// avg_fee_12m for a rolling window, and cases_with_fee so a one-case "average"
+// can be recognised as one. See definitions/gold/fct_fee_by_type.sqlx.
+const Q_FEE_BY_TYPE = `
+SELECT case_type, avg_fee, cases_with_fee, fees_total, avg_fee_12m, cases_with_fee_12m
+FROM \`gold.fct_fee_by_type\`
+ORDER BY fees_total DESC`;
 
 const Q_DAILY_GOLD = `
 SELECT day, revenue, costs, personnel, marketing, ga, fees_collected,
@@ -141,7 +164,7 @@ FROM cl LEFT JOIN fy USING (attorney) LEFT JOIN fm USING (attorney) LEFT JOIN dm
 ORDER BY cl.open_cases DESC`;
 
 // Panels with no source in the warehouse yet. Empty, never invented.
-const EMPTY = ['fee_by_type', 'marketing_sources', 'cost_per_signed_daily',
+const EMPTY = ['marketing_sources', 'cost_per_signed_daily',
   'case_list', 'top25', 'cp_cases', 'cp_demands', 'cp_offers', 'ld_leads',
   'qb_deposits', 'qb_purchases', 'gads_campaign_stats', 'meta_basic_ad'];
 
@@ -196,6 +219,9 @@ function kpisFrom(daily) {
 }
 
 async function build(since) {
+  degraded.length = 0;   // per build, not per process: a stale entry from an
+                         // earlier request would report a panel as broken
+                         // after it had started working again
   if (schemaHasMarketing === null) {
     const [{ n }] = await q(Q_PROBE);
     schemaHasMarketing = Number(n) === 2;
@@ -212,20 +238,22 @@ async function build(since) {
   const dailyParams = { since };
 
   const [metrics_daily, monthly, cases_by_stage, load_by_attorney,
-    load_by_cm, intake_workers, attorney_perf] = await Promise.all([
+    load_by_cm, intake_workers, attorney_perf, fee_by_type] = await Promise.all([
     q(dailySql, dailyParams), q(Q_MONTHLY), q(Q_STAGE), q(Q_LOAD_ATT),
     q(Q_LOAD_CM), q(Q_INTAKE), q(Q_ATTORNEY),
+    qSafe('fee_by_type', Q_FEE_BY_TYPE),
   ]);
 
   const data = {
     metrics_daily, monthly, cases_by_stage, load_by_attorney,
-    load_by_cm, intake_workers, attorney_perf,
+    load_by_cm, intake_workers, attorney_perf, fee_by_type,
     kpis: kpisFrom(metrics_daily),
   };
   for (const k of EMPTY) data[k] = [];
   data._as_of = metrics_daily.length ? metrics_daily[metrics_daily.length - 1].day : null;
   data._source = 'gold.metrics_daily';
   data._generated_at = new Date().toISOString();
+  if (degraded.length) data._degraded = degraded.splice(0);
   return data;
 }
 

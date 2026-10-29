@@ -88,12 +88,18 @@ carrying invented numbers.
 `GCP_SA_KEY_B64` — a JSON key for `firm-health-dashboard@…`, base64-encoded.
 The function reads it server-side and queries BigQuery directly.
 
-`api/metrics.mjs` still supports a second mode, `METRICS_URL` + `DASH_TOKEN`,
-which proxies to the Cloud Run service in `metrics-api/`. That existed only
-because we could not mint a key at the time, and it ran as the project's
-default compute account — which could write as well as read. **Do not use it.**
-The dedicated read-only account now exists, so the proxy mode is dead weight
-and `metrics-api/` can be deleted once this is live.
+`api/metrics.mjs` still accepts a second mode, `METRICS_URL` + `DASH_TOKEN`,
+which proxied to a Cloud Run service. That existed only because we could not
+mint a key at the time, and it ran as the project's default compute account —
+which could write as well as read. **Do not use it.** Leave both unset.
+
+The `metrics-api/` directory that held that service has been **removed from
+this repo**, and not only because it was dead weight: Vercel's build detection
+saw `metrics-api/requirements.txt` and `main_metrics.py`, concluded the project
+was Python, and failed the build with `PYTHON_ENTRYPOINT_NOT_FOUND` before it
+ever looked at `api/metrics.mjs`. Keep this repo free of `requirements.txt`,
+`*.py` and `pyproject.toml` anywhere in the tree. Those files are still in git
+history if ever needed: `git show 02a92e1 -- metrics-api/`.
 
 ## Environment variables
 
